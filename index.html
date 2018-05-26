@@ -77,6 +77,8 @@
         case KEY_A_BTN: buttonState[5] = 1; break;
         case KEY_B_BTN: buttonState[6] = 1; break;
       }
+      if(document.activeElement != document.getElementById("editor"))
+      e.preventDefault();
       return false;
     });
 
