@@ -57,29 +57,34 @@
     let spriteImage;
 
     window.addEventListener("keyup",function(e){
-      switch(e.keyCode){
-        case KEY_UP: buttonState[2] = 0; break;
-        case KEY_DOWN: buttonState[3] = 0; break;
-        case KEY_LEFT: buttonState[0] = 0; break;
-        case KEY_RIGHT: buttonState[1] = 0; break;
-        case KEY_START_BTN: buttonState[4] = 0; break;
-        case KEY_A_BTN: buttonState[5] = 0; break;
-        case KEY_B_BTN: buttonState[6] = 0; break;
+      if(document.activeElement != document.getElementById("editor")){
+        e.preventDefault();
+        switch(e.keyCode){
+          case KEY_UP: buttonState[2] = 0; break;
+          case KEY_DOWN: buttonState[3] = 0; break;
+          case KEY_LEFT: buttonState[0] = 0; break;
+          case KEY_RIGHT: buttonState[1] = 0; break;
+          case KEY_START_BTN: buttonState[4] = 0; break;
+          case KEY_A_BTN: buttonState[5] = 0; break;
+          case KEY_B_BTN: buttonState[6] = 0; break;
+        }
+        return false;
       }
     });
     window.addEventListener("keydown",function(e){
-      switch(e.keyCode){
-        case KEY_UP: buttonState[2] = 1; break;
-        case KEY_DOWN: buttonState[3] = 1; break;
-        case KEY_LEFT: buttonState[0] = 1; break;
-        case KEY_RIGHT: buttonState[1] = 1; break;
-        case KEY_START_BTN: buttonState[4] = 1; break;
-        case KEY_A_BTN: buttonState[5] = 1; break;
-        case KEY_B_BTN: buttonState[6] = 1; break;
+      if(document.activeElement != document.getElementById("editor")){
+        switch(e.keyCode){
+          case KEY_UP: buttonState[2] = 1; break;
+          case KEY_DOWN: buttonState[3] = 1; break;
+          case KEY_LEFT: buttonState[0] = 1; break;
+          case KEY_RIGHT: buttonState[1] = 1; break;
+          case KEY_START_BTN: buttonState[4] = 1; break;
+          case KEY_A_BTN: buttonState[5] = 1; break;
+          case KEY_B_BTN: buttonState[6] = 1; break;
+        }
+        e.preventDefault();
+        return false;
       }
-      if(document.activeElement != document.getElementById("editor"))
-      e.preventDefault();
-      return false;
     });
 
     var osc= [];
