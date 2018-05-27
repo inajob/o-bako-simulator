@@ -13,6 +13,9 @@
     canvas{
       border: solid #383;
     }
+    #container{
+      position:absolute;
+    }
     #controller{
       text-align:center;
     }
@@ -23,6 +26,7 @@
     #editor{
       height: 384px;
       width: calc(100% - 400px);
+      margin-left:400px;
       background-color: black;
       color: #ddd;
     }
@@ -41,6 +45,8 @@
       color: #fff;
     }
   </style>
+  <script src="ace/src-min/ace.js" type="text/javascript"></script>
+
   <script src="js/fengari-web.js" type="text/javascript"></script>
   <script type="text/javascript">
     const KEY_UP = 38;
@@ -58,7 +64,7 @@
     let spriteImage;
 
     window.addEventListener("keyup",function(e){
-      if(document.activeElement != document.getElementById("editor")){
+      if(!editor.isFocused()){
         e.preventDefault();
         switch(e.keyCode){
           case KEY_UP: buttonState[2] = 0; break;
@@ -73,7 +79,7 @@
       }
     });
     window.addEventListener("keydown",function(e){
-      if(document.activeElement != document.getElementById("editor")){
+      if(!editor.isFocused()){
         switch(e.keyCode){
           case KEY_UP: buttonState[2] = 1; break;
           case KEY_DOWN: buttonState[3] = 1; break;
@@ -320,6 +326,10 @@
     }
 
     window.onload= function(){
+      editor = ace.edit("editor");
+      editor.setTheme("ace/theme/monokai");
+      editor.session.setMode("ace/mode/lua");
+
       const errElm = document.getElementById("error");
 
       // init canvas
@@ -361,9 +371,8 @@
           clearTimeout(timer);
         }
         clearErr();
-        const editor = document.getElementById("editor");
         L = initLua(ctx);
-        const str = fengari.to_luastring(editor.value);
+        const str = fengari.to_luastring(editor.getValue());
 
         runGame(L, str, c, ctxm, errf);
       }
@@ -377,11 +386,13 @@
   </script>
 </head>
 <body>
-<a href="https://github.com/inajob/o-bako-simulator"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
+<a href="https://github.com/inajob/o-bako-simulator"><img style="position: absolute; top: 0; right: 0; border: 0;z-index:1000;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
   <h1>o-bako Simulator</h1>
-  <canvas id="original"></canvas>
-  <canvas id="main"></canvas>
-  <textarea id="editor">
+  <div id="container">
+    <canvas id="original"></canvas>
+    <canvas id="main"></canvas>
+  </div>
+  <div id="editor">
 function setup()
 end
 
@@ -524,7 +535,7 @@ function do_over()
   end
   return M_OVER
 end
-  </textarea>
+  </div>
   <div id="controller">
     <input id="runbtn" type="button" value="Execute" />
   </div>
