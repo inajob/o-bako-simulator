@@ -1,6 +1,7 @@
 <html>
 <head>
   <title>o-bako Simulator</title>
+  <meta charset="UTF-8">
   <style>
     body{
       background-color: black;
@@ -280,11 +281,52 @@
       next(1000/30);
     }
 
+    function loadBitmap(errf){
+      var xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4){
+          if(xhr.status == 200){
+            console.log(xhr.response);
+            var byteArray = new Uint8Array(xhr.response);
+            console.log(byteArray[1])
+            if(byteArray[0] != 'B'.charCodeAt(0)){errf("bitmap header error 0");return -1}
+            if(byteArray[1] != 'M'.charCodeAt(0)){errf("bitmap header error 1");return -1}
+            let offset = (byteArray[13]<<24) + (byteArray[12]<<16) + (byteArray[11]<<8) + byteArray[10];
+            let width  = (byteArray[15]<<24) + (byteArray[16]<<16) + (byteArray[17]<<8) + byteArray[18];
+            let height = (byteArray[25]<<24) + (byteArray[24]<<16) + (byteArray[23]<<8) + byteArray[22];
+            let biBitCount = (byteArray[29]<<8) + byteArray[28];
+            if(width != 128){errf("invalid bitmap width " + width);return -1}
+            if(height != 128){errf("invalid bitmap height " + height);return -1}
+            if(biBitCount != 8){errf("invalid bitmap bitCount " + biBitCount);return -1}
+            let biSize = (byteArray[17]<<24) + (byteArray[16]<<16) + (byteArray[15]<<8) + byteArray[14];
+            let paletteStart = 14 + biSize;
+            let palette=[];
+            for(let i = 0; i < 256; i ++){
+              palette[i] = [byteArray[paletteStart + i*4],byteArray[paletteStart + i*4 + 1],byteArray[paletteStart + i*4 + 2]]
+            }
+            let sctx = spriteImage.getContext("2d");
+            for(let i = 0; i < width*height; i ++){
+              let index = byteArray[offset + width*height - i - 1];
+              let alpha = (index == 0)?0:255;
+              sctx.fillStyle = "rgba(" + palette[index][2] + ","  + palette[index][1] + ","  + palette[index][0] + "," + alpha + ")"
+              sctx.fillRect(128 - i%128 - 1, Math.floor(i/128), 1, 1);
+            }
+          }
+        }
+      }
+      xhr.open("GET", "sprite.bmp");
+      xhr.responseType = "arraybuffer"
+      xhr.send();
+    }
+
     window.onload= function(){
       const errElm = document.getElementById("error");
 
       // init canvas
       spriteImage = document.getElementById("sprite");
+      sprite.width = 128;
+      sprite.height = 128;
+
       const c = document.getElementById("original");
       c.width = size;
       c.height = size;
@@ -310,6 +352,8 @@
       function errf(s){
         errElm.appendChild(document.createTextNode(s));
       }
+
+      loadBitmap(errf);
 
       const runButton = document.getElementById("runbtn");
       function execute(){
@@ -513,7 +557,7 @@ You can only use the sprite image below. If you want to use another image, feel 
   </div>
   <div>
   <h2>Sprite</h2>
-  <img id="sprite" src="sprite.bmp" />
+  <canvas id="sprite"/>
   </div>
   <div>
   <h2>Specification</h2>
