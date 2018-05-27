@@ -132,8 +132,12 @@
         const h = fengari.lua.lua_tointeger(L, 4);
         const sx = fengari.lua.lua_tointeger(L, 5);
         const sy = fengari.lua.lua_tointeger(L, 6);
-        const sw = fengari.lua.lua_tointeger(L, 7);
-        const sh = fengari.lua.lua_tointeger(L, 8);
+        let sw = w;
+        let sh = h;
+        if(fengari.lua.lua_gettop(L) == 8){
+          sw = fengari.lua.lua_tointeger(L, 7);
+          sh = fengari.lua.lua_tointeger(L, 8);
+        }
 
         ctx.drawImage(spriteImage, sx, sy, sw, sh, x, y, w, h);
         return 0;
@@ -427,7 +431,7 @@ function do_game()
     max_chrs = (score - 200)/50 + 4
   end
 
-  spr(x, y, 16, 16, 0, 0, 16, 16)
+  spr(x, y, 16, 16, 0, 0)
   if btn(0) > 0 and x > 0 then
     x = x - 1
   end
@@ -453,7 +457,7 @@ function do_game()
     if -16 < c.x and -16 < c.y and c.x < 128 and c.y < 128 then
       new_chrs[#new_chrs + 1] = c
     end
-    spr(c.x, c.y, 16, 16, 16, 0, 16, 16)
+    spr(c.x, c.y, 16, 16, 16, 0)
   end
   chrs = new_chrs
 
@@ -526,9 +530,9 @@ You can only use the sprite image below. If you want to use another image, feel 
     <td>Generate tone(no: 0-2, vol: 0-255)</td>
   </tr>
   <tr>
-    <td>spr(x,y,w,h,sx,sy)</td>
-    <td>(x,y)にspriteを(sx,sy)から描画する。サイズはw,h</td>
-    <td>draw sprite to (x,y) from (sx, sy) with the size w,h</td>
+    <td>spr(x,y,w,h,sx,sy[,sw,sh])</td>
+    <td>(x,y)にspriteを(sx,sy)からサイズはw,hで描画する。sw,shを設定すると拡大、縮小できる。</td>
+    <td>draw sprite to (x,y) from (sx, sy) with the size w,h. setting sw, sh can scale sprite.</td>
   </tr>
   <tr>
     <td>pset(x,y)</td>
