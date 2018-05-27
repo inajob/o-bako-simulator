@@ -428,16 +428,16 @@ function do_game()
   end
 
   spr(x, y, 16, 16, 0, 0, 16, 16)
-  if btn(0) > 0 then
+  if btn(0) > 0 and x > 0 then
     x = x - 1
   end
-  if btn(1) > 0 then
+  if btn(1) > 0 and x < 128-16 then
     x = x + 1
   end
-  if btn(2) > 0 then
+  if btn(2) > 0  and y > 0 then
     y = y - 1
   end
-  if btn(3) > 0 then
+  if btn(3) > 0 and y < 128-16 then
     y = y + 1
   end
 
@@ -476,7 +476,6 @@ function do_over()
   end
   return M_OVER
 end
-
   </textarea>
   <div id="controller">
     <input id="runbtn" type="button" value="Execute" />
