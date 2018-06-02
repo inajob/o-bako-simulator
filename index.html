@@ -109,6 +109,7 @@
       // osc -- gain -+
       // osc -- gain -+
       // osc -- gain -+- destination
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
       let actx = new window.AudioContext();
       for(let i = 0; i < 3; i ++){
         osc[i] = actx.createOscillator();
