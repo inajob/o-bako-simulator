@@ -311,8 +311,7 @@
 
       ctx = c.getContext("2d");
       ctx.imageSmoothingEnabled = false;
-      ctx.translate(0.5, 0.5);
-      ctx.font = "11px 'ＭＳ ゴシック'";
+      ctx.font = "11px 'ＭＳ ゴシック',sans-serif";
 
       const m = document.getElementById("main");
       m.width = size * zoom;
