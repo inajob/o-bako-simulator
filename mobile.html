@@ -9,7 +9,7 @@
   <meta property="og:title" content="o-bako Simulator" />
   <meta property="og:description" content="o-bako Simulator: o-bako is game console." />
   <meta property="og:image" content="https://inajob.github.io/o-bako-simulator/ogp.jpg" />
-  <meta name="viewport" content="width=400,initial-scale=1">
+  <meta name="viewport" content="width=400,initial-scale=1,user-scalable=no">
 
   <style>
     body{
@@ -35,6 +35,11 @@
       height: 64px;
       text-align: center;
       border-radius: 10px;
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer */
+      -khtml-user-select: none; /* KHTML browsers (e.g. Konqueror) */
+      -webkit-user-select: none; /* Chrome, Safari, and Opera */
+      -webkit-touch-callout: none; /* Disable Android and iOS callouts*/
     }
     #btn_l{
       left: 0px;
