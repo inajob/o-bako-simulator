@@ -206,42 +206,112 @@
       next(1000/30);
     }
 
-    function loadBitmap(errf){
+    function loadFile(address, type, f){
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function(){
         if(xhr.readyState == 4){
           if(xhr.status == 200){
-            console.log(xhr.response);
-            var byteArray = new Uint8Array(xhr.response);
-            console.log(byteArray[1])
-            if(byteArray[0] != 'B'.charCodeAt(0)){errf("bitmap header error 0");return -1}
-            if(byteArray[1] != 'M'.charCodeAt(0)){errf("bitmap header error 1");return -1}
-            let offset = (byteArray[13]<<24) + (byteArray[12]<<16) + (byteArray[11]<<8) + byteArray[10];
-            let width  = (byteArray[15]<<24) + (byteArray[16]<<16) + (byteArray[17]<<8) + byteArray[18];
-            let height = (byteArray[25]<<24) + (byteArray[24]<<16) + (byteArray[23]<<8) + byteArray[22];
-            let biBitCount = (byteArray[29]<<8) + byteArray[28];
-            if(width != 128){errf("invalid bitmap width " + width);return -1}
-            if(height != 128){errf("invalid bitmap height " + height);return -1}
-            if(biBitCount != 8){errf("invalid bitmap bitCount " + biBitCount);return -1}
-            let biSize = (byteArray[17]<<24) + (byteArray[16]<<16) + (byteArray[15]<<8) + byteArray[14];
-            let paletteStart = 14 + biSize;
-            let palette=[];
-            for(let i = 0; i < 256; i ++){
-              palette[i] = [byteArray[paletteStart + i*4],byteArray[paletteStart + i*4 + 1],byteArray[paletteStart + i*4 + 2]]
-            }
-            let sctx = spriteImage.getContext("2d");
-            for(let i = 0; i < width*height; i ++){
-              let index = byteArray[offset + width*height - i - 1];
-              let alpha = (index == 0)?0:255;
-              sctx.fillStyle = "rgba(" + palette[index][2] + ","  + palette[index][1] + ","  + palette[index][0] + "," + alpha + ")"
-              sctx.fillRect(128 - i%128 - 1, Math.floor(i/128), 1, 1);
-            }
+            f(xhr.response);
           }
         }
-      }
-      xhr.open("GET", "sprite.bmp");
-      xhr.responseType = "arraybuffer"
+      };
+      xhr.open("GET", address);
+      xhr.responseType = type;
       xhr.send();
+    }
+    var downloadQueue = {};
+
+    function isDownloadComplete(){
+      for(x in downloadQueue){
+        if(downloadQueue[x].body == undefined){
+          return false
+        }
+      }
+      return true;
+    }
+
+    function loadGame(address, execute){
+      loadFile(address + "/game.json", "text", function(o){
+        const obj = JSON.parse(o);
+        console.log("game.json", obj)
+        // todo: multiple scripts, images
+        //const scripts = obj.scripts;
+        //const images = obj.images;
+        //scripts.forEach(function(e){downloadQueue[e] = {path: e, type: "script"}});
+        //images.forEach(function(e){downloadQueue[e] = {path: e, type: "image"}});
+        downloadQueue[obj.script] = {path: obj.script, type: "script"};
+        downloadQueue[obj.image] = {path: obj.image, type: "image"};
+
+        Object.keys(downloadQueue).forEach(function(e){
+          (function(e){
+            let type = "text";
+            if(downloadQueue[e].type == "image"){
+              type = "arraybuffer"
+            }
+            loadFile(address + "/" + e, type, function(o){
+              downloadQueue[e].body = o;
+              if(isDownloadComplete()){
+                // all downloaded
+                console.log("download all");
+                initGame(execute);
+              }
+            });
+          })(e)
+        });
+      });
+    }
+    function initGame(execute){
+      for(x in downloadQueue){
+        switch(downloadQueue[x].type){
+          case "script":
+            // todo: only support single script
+            if(mode == "editor"){
+              editor.setValue(downloadQueue[x].body);
+            }else{
+              let editor = document.getElementById("editor");
+              editor.value = downloadQueue[x].body;
+            }
+            console.log("set value");
+          break;
+          case "image":
+            // todo: only support single image
+            loadBitmap(downloadQueue[x].body);
+            console.log("load bitmap");
+          break;
+          default:
+            console.log("unknown type:" + downloadQueue[x].type);
+        }
+      }
+      execute();
+    }
+
+
+
+    function loadBitmap(arr){
+      var byteArray = new Uint8Array(arr);
+      console.log(byteArray[1])
+      if(byteArray[0] != 'B'.charCodeAt(0)){errf("bitmap header error 0");return -1}
+      if(byteArray[1] != 'M'.charCodeAt(0)){errf("bitmap header error 1");return -1}
+      let offset = (byteArray[13]<<24) + (byteArray[12]<<16) + (byteArray[11]<<8) + byteArray[10];
+      let width  = (byteArray[15]<<24) + (byteArray[16]<<16) + (byteArray[17]<<8) + byteArray[18];
+      let height = (byteArray[25]<<24) + (byteArray[24]<<16) + (byteArray[23]<<8) + byteArray[22];
+      let biBitCount = (byteArray[29]<<8) + byteArray[28];
+      if(width != 128){errf("invalid bitmap width " + width);return -1}
+      if(height != 128){errf("invalid bitmap height " + height);return -1}
+      if(biBitCount != 8){errf("invalid bitmap bitCount " + biBitCount);return -1}
+      let biSize = (byteArray[17]<<24) + (byteArray[16]<<16) + (byteArray[15]<<8) + byteArray[14];
+      let paletteStart = 14 + biSize;
+      let palette=[];
+      for(let i = 0; i < 256; i ++){
+        palette[i] = [byteArray[paletteStart + i*4],byteArray[paletteStart + i*4 + 1],byteArray[paletteStart + i*4 + 2]]
+      }
+      let sctx = spriteImage.getContext("2d");
+      for(let i = 0; i < width*height; i ++){
+        let index = byteArray[offset + width*height - i - 1];
+        let alpha = (index == 0)?0:255;
+        sctx.fillStyle = "rgba(" + palette[index][2] + ","  + palette[index][1] + ","  + palette[index][0] + "," + alpha + ")"
+        sctx.fillRect(128 - i%128 - 1, Math.floor(i/128), 1, 1);
+      }
     }
 
     var c, ctx,ctxm;
@@ -287,9 +357,17 @@
           elm.addEventListener("touchstart",function(e){
             buttonState[no] = 1;
           });
+          elm.addEventListener("mousedown",function(e){
+            buttonState[no] = 1;
+          });
+
           elm.addEventListener("touchend",function(e){
             buttonState[no] = 0;
           });
+          elm.addEventListener("mouseup",function(e){
+            buttonState[no] = 0;
+          });
+
         }
         btnAttach("btn_l", 0);
         btnAttach("btn_r", 1);
@@ -326,19 +404,5 @@
       function errf(s){
         console.log(s);
       }
-
-      loadBitmap(errf);
-
-      function execute(){
-        if(timer){
-          clearTimeout(timer);
-        }
-        L = initLua(ctx);
-        const editor = document.getElementById("editor");
-        const str = fengari.to_luastring(editor.value);
-
-        runGame(L, str, c, ctxm, errf);
-      }
-      execute();
     });
 

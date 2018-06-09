@@ -1,0 +1,7 @@
+{
+  "script": "main.lua",
+  "image": "sprite.bmp",
+  "name": "avoid enemies",
+  "authors": ["inajob"],
+  "license": "MIT"
+}
