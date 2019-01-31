@@ -120,6 +120,7 @@
   <select id="url" name="url">
     <option value="games/avoid-enemies">local avoid-enemies</option>
     <option value="games/hello-world">local hello-world</option>
+    <option value="games/jump">local jump</option>
   </select>
   <input type="button" id="loadbtn" value="Load Game" />
 
@@ -179,9 +180,19 @@ You can only use the sprite image below. If you want to use another image, feel 
     <td>draw pixel at (x,y)</td>
   </tr>
   <tr>
+    <td>pget(x,y)</td>
+    <td>(x,y)のドットの色を取得、[r,g,b,i]を返却 iはパレットの番号 (未実装)</td>
+    <td>get color of (x,y), return value is [r,g,b,i] `i` is pallete index. (not implement)</td>
+  </tr>
+  <tr>
     <td>color(r,g,b)</td>
     <td>ペンの色を[r,g,b]に設定。(r: 0-255, g: 0-255, b: 0-255)</td>
     <td>set pen color [r,g,b] (r: 0-255, g: 0-255, b: 0-255)</td>
+  </tr>
+  <tr>
+    <td>color(i)</td>
+    <td>ペンの色をi番目のパレットの色に設定。(i: 0-255) (未実装)</td>
+    <td>set pen color palette[i] (i: 0-255) (not implement)</td>
   </tr>
   <tr>
     <td>text(s,x,y)</td>
@@ -237,6 +248,31 @@ You can only use the sprite image below. If you want to use another image, feel 
     <td>reboot()</td>
     <td>端末のリブート（未実装）</td>
     <td>reboot machine (not implement)</td>
+  </tr>
+  <tr>
+    <td>require(filename)</td>
+    <td>外部Luaの読み込み(未実装)</td>
+    <td>load lua file (not implement)</td>
+  </tr>
+  <tr>
+    <td>httpsget(host, path)</td>
+    <td>HTTPS GET(未実装)</td>
+    <td>HTTPS GET (not implement)</td>
+  </tr>
+  <tr>
+    <td>httpsgetfile(host, path, filepath)</td>
+    <td>HTTPS GETしたファイルを保存(未実装)</td>
+    <td>HTTPS GET to file (not implement)</td>
+  </tr>
+  <tr>
+    <td>savebmp(filename)</td>
+    <td>スクリーンをbmpファイルとして保存(未実装)</td>
+    <td>save screen as Bitmap file (not implement)</td>
+  </tr>
+  <tr>
+    <td>savebmp(filename)</td>
+    <td>スクリーンをbmpファイルとして保存(未実装)</td>
+    <td>save screen as Bitmap file (not implement)</td>
   </tr>
   </table>
   </div>
