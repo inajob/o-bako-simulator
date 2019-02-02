@@ -1,0 +1,7 @@
+{
+  "script": "main.lua",
+  "image": "sprite.bmp",
+  "name": "2048",
+  "authors": ["inajob"],
+  "license": "MIT"
+}
