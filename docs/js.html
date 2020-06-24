@@ -1,0 +1,312 @@
+<html>
+<head>
+  <title>o-bako Simulator</title>
+  <meta charset="UTF-8">
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@ina_ani" />
+  <meta property="og:url" content="https://inajob.github.io/o-bako-simulator/index.html" />
+  <meta property="og:title" content="o-bako Simulator" />
+  <meta property="og:description" content="o-bako Simulator: o-bako is game console." />
+  <meta property="og:image" content="https://inajob.github.io/o-bako-simulator/ogp.jpg" />
+
+  <style>
+    body{
+      background-color: black;
+      color: white;
+    }
+    canvas#original{
+      display: none;
+    }
+    canvas{
+      border: solid #383;
+    }
+    #container{
+      position:absolute;
+    }
+    #controller{
+      text-align:center;
+    }
+    #error{
+      color: red;
+      background-color:white;
+    }
+    #editor{
+      height: 384px;
+      width: calc(100% - 400px);
+      margin-left:400px;
+      background-color: black;
+      color: #ddd;
+    }
+    #sprite{
+      border: solid #383;
+    }
+    table td{
+      border: solid 1px #383;
+    }
+    .pad{
+      margin:2em;
+      padding:1em;
+      background-color: #383;
+    }
+    a{
+      color: #fff;
+    }
+  </style>
+  <script src="ace/src-min/ace.js" type="text/javascript"></script>
+
+  <script src="js/out.js" type="text/javascript"></script>
+  <script src="js/engine-js.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    mode = "editor";
+    var dukwebEval;
+
+    window.addEventListener("load",function(){
+        setTimeout(function(){
+
+        let dukweb_eval = c.cwrap("dukweb_eval", "string", ["string"]);
+        console.log("load");
+        c.ccall("dukweb_open")
+        dukwebEval = function(code){
+          var escapedString = JSON.stringify(String(code));
+          var res = dukweb_eval(
+            '(function(){ var t; try {' +
+            't = eval(' + escapedString + ');' +
+            'return JSON.stringify(t) || "\\"undefined\\"";' +
+            '}catch(e){' +
+            'return "ERROR: " + String(e);' +
+            '}})();'
+          );
+          var ref;
+          try{
+            var ref = JSON.parse(res);
+          }catch(e){
+            console.log(code,res,e);
+            throw {"res":res};
+          }
+          return ref;
+        };
+        dukwebEval("Dukweb = {};")
+        dukwebEval("Dukweb.eval = this.emscripten_run_script; delete this.emscripten_run_script;")
+        const errElm = document.getElementById("error");
+
+        editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/javascript");
+
+        function clearErr(){
+          errElm.innerHTML = "";
+        }
+        function errf(s){
+          errElm.appendChild(document.createTextNode(s));
+        }
+
+        function execute(){
+          if(timer){
+            clearTimeout(timer);
+          }
+          clearErr();
+          L = initDuktape(ctx);
+          //const str = fengari.to_luastring(editor.getValue());
+          const str = editor.getValue();
+
+          runGame(L, str, c, ctxm, errf);
+        }
+
+        const loadButton = document.getElementById("loadbtn");
+        loadButton.addEventListener("click", function(e){
+          const list = document.getElementById("url");
+          const address = list.value;
+          console.log(address);
+          loadGame(address, execute);
+        });
+
+        const runButton = document.getElementById("runbtn");
+        runButton.addEventListener("click", function(e){
+          execute();
+        });
+        loadGame("games/avoid-enemies", execute);
+
+      },1000);
+    })
+  </script>
+</head>
+<body>
+<a href="https://github.com/inajob/o-bako-simulator"><img style="position: absolute; top: 0; right: 0; border: 0;z-index:1000;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
+  <h1>o-bako Simulator with Duktape</h1>
+  <div id="container">
+    <canvas id="original"></canvas>
+    <canvas id="main"></canvas>
+  </div>
+  <div id="editor">
+  </div>
+  <div id="controller">
+    <input id="runbtn" type="button" value="Execute" />
+  </div>
+  <div id="error">
+  </div>
+  <h2>Game Select</h2>
+  <select id="url" name="url">
+    <option value="games/avoid-enemies">local avoid-enemies</option>
+    <option value="games/hello-world">local hello-world</option>
+    <option value="games/jump">local jump</option>
+    <option value="games/2048">local 2048</option>
+  </select>
+  <input type="button" id="loadbtn" value="Load Game" />
+
+  <div class="pad">
+o-bakoのシミュレータです。(o-bakoはまだ開発中です）
+Lua言語で記述します。起動時にsetup()が1度呼ばれその後30FPSの間隔でloop()が呼ばれます。
+
+スプライトについては、下記spriteの画像が参照できます。別の画像を参照したい場合は、このプロジェクトをforkして好きに書き換えてください。
+  </div>
+  <div class="pad">
+This is the simulator of o-bako.(o-bako is under construction.)
+You can write program with Lua. When boot time, o-bako call `setup()`. Then call `loop()` every 30FPS.
+
+You can only use the sprite image below. If you want to use another image, feel free to fork this repository and modify the image.
+  </div>
+  <div>created by <a href="http://twitter.com/ina_ani" target="_blank">@ina_ani</a></div>
+  <div>
+  <h2>for Smartphone</h2>
+    <a href="mobile.html">-&gt; mobile version</a>
+  <h2>Button mapping</h2>
+  <table>
+    <tr><td>0</td><td>LEFT</td></tr>
+    <tr><td>1</td><td>RIGHT</td></tr>
+    <tr><td>2</td><td>UP</td></tr>
+    <tr><td>3</td><td>DOWN</td></tr>
+    <tr><td>4</td><td>StartButton (A)</td></tr>
+    <tr><td>5</td><td>1Button (Z)</td></tr>
+    <tr><td>6</td><td>2Button (X)</td></tr>
+  </table>
+  </div>
+  <div>
+  <h2>Sprite</h2>
+  <canvas id="sprite"/>
+  </div>
+  <div>
+  <h2>Specification</h2>
+  <table>
+    <tr><td>resolution</td><td>128*128 full color</td></tr>
+    <tr><td>interface</td><td>d-pad + A,B button + Start button</td></tr>
+    <tr><td>sound</td><td>3 tones generator</td></tr>
+  </table>
+  <h2>Reference</h2>
+  <table>
+  <tr>
+    <td>tone(no, freq, vol)</td>
+    <td>音を鳴らす(no: 0-2, vol: 0-255)</td>
+    <td>Generate tone(no: 0-2, vol: 0-255)</td>
+  </tr>
+  <tr>
+    <td>spr(x,y,w,h,sx,sy[,sw,sh])</td>
+    <td>(x,y)にspriteを(sx,sy)からサイズはw,hで描画する。sw,shを設定すると拡大、縮小できる。</td>
+    <td>draw sprite to (x,y) from (sx, sy) with the size w,h. setting sw, sh can scale sprite.</td>
+  </tr>
+  <tr>
+    <td>pset(x,y)</td>
+    <td>(x,y)に1ピクセルのドットを描画</td>
+    <td>draw pixel at (x,y)</td>
+  </tr>
+  <tr>
+    <td>pget(x,y)</td>
+    <td>(x,y)のドットの色を取得、[r,g,b,i]を返却 iはパレットの番号 (未実装)</td>
+    <td>get color of (x,y), return value is [r,g,b,i] `i` is pallete index. (not implement)</td>
+  </tr>
+  <tr>
+    <td>color(r,g,b)</td>
+    <td>ペンの色を[r,g,b]に設定。(r: 0-255, g: 0-255, b: 0-255)</td>
+    <td>set pen color [r,g,b] (r: 0-255, g: 0-255, b: 0-255)</td>
+  </tr>
+  <tr>
+    <td>color(i)</td>
+    <td>ペンの色をi番目のパレットの色に設定。(i: 0-255) (未実装)</td>
+    <td>set pen color palette[i] (i: 0-255) (not implement)</td>
+  </tr>
+  <tr>
+    <td>text(s,x,y)</td>
+    <td>(x,y)に文字列sを描画</td>
+    <td>draw string s to (x,y)</td>
+  </tr>
+  <tr>
+    <td>drawrect(x,y,w,h)</td>
+    <td>(x,y)にサイズw,hの四角形の枠線を描画</td>
+    <td>draw rectanble (x,y) with the size w,h</td>
+  </tr>
+  <tr>
+    <td>fillrect(x,y,w,h)</td>
+    <td>(x,y)にサイズw,hの四角形を塗りつぶす</td>
+    <td>fill rectanble (x,y) with the size w,h</td>
+  </tr>
+  <tr>
+    <td>fillcircle(x,y,r)</td>
+    <td>(x,y)を中心に半径rの円を塗りつぶす</td>
+    <td>fill circle at (x,y) with radius r</td>
+  </tr>
+  <tr>
+    <td>btn(n)</td>
+    <td>ボタンの入力を取得 ボタンを押してからのフレーム数が返る</td>
+    <td>get button input. returns frame count while press button.</td>
+  </tr>
+  <tr>
+    <td>getip()</td>
+    <td>IPアドレスを取得（未実装）</td>
+    <td>get IP address (not implement)</td>
+  </tr>
+  <tr>
+    <td>iswifidebug()</td>
+    <td>WiFiがオンになっているかを取得（未実装）</td>
+    <td>get whether WiFi on(not implement)</td>
+  </tr>
+  <tr>
+    <td>wifiserve()</td>
+    <td>WiFiをオンにする（未実装）</td>
+    <td>turn on WiFi(not implement)</td>
+  </tr>
+  <tr>
+    <td>run(file)</td>
+    <td>fileを実行（未実装）</td>
+    <td>run file (not implement)</td>
+  </tr>
+  <tr>
+    <td>list()</td>
+    <td>ファイル一覧を取得（未実装）</td>
+    <td>get file list (not implement)</td>
+  </tr>
+  <tr>
+    <td>reboot()</td>
+    <td>端末のリブート（未実装）</td>
+    <td>reboot machine (not implement)</td>
+  </tr>
+  <tr>
+    <td>require(filename)</td>
+    <td>外部Luaの読み込み(未実装)</td>
+    <td>load lua file (not implement)</td>
+  </tr>
+  <tr>
+    <td>httpsget(host, path)</td>
+    <td>HTTPS GET(未実装)</td>
+    <td>HTTPS GET (not implement)</td>
+  </tr>
+  <tr>
+    <td>httpsgetfile(host, path, filepath)</td>
+    <td>HTTPS GETしたファイルを保存(未実装)</td>
+    <td>HTTPS GET to file (not implement)</td>
+  </tr>
+  <tr>
+    <td>savebmp(filename)</td>
+    <td>スクリーンをbmpファイルとして保存(未実装)</td>
+    <td>save screen as Bitmap file (not implement)</td>
+  </tr>
+  <tr>
+    <td>savebmp(filename)</td>
+    <td>スクリーンをbmpファイルとして保存(未実装)</td>
+    <td>save screen as Bitmap file (not implement)</td>
+  </tr>
+  </table>
+  </div>
+  <hr>
+  <div>created by <a href="http://twitter.com/ina_ani" target="_blank">@ina_ani</a></div>
+</body>
+</html>
