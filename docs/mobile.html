@@ -79,18 +79,20 @@
     }
   </style>
   <script src="js/fengari-web.js" type="text/javascript"></script>
+  <script src="js/o-bako-lib.js" type="text/javascript"></script>
   <script type="text/javascript">
     mode = "mobile";
   </script>
   <script src="js/engine.js" type="text/javascript"></script>
   <script type="text/javascript">
+    let util = new OBakoUtil();
     window.addEventListener("load",function(){
       const loadButton = document.getElementById("loadbtn");
       loadButton.addEventListener("click", function(e){
         const list = document.getElementById("url");
         const address = list.value;
         console.log(address);
-        loadGame(address, execute);
+        util.loadGame(address, () => initGame(execute));
       });
 
       function execute(){
@@ -106,7 +108,7 @@
         }
         runGame(L, str, c, ctxm, errf);
       }
-      loadGame("games/avoid-enemies", execute);
+      util.loadGame("games/avoid-enemies", () => initGame(execute));
     });
   </script>
 </head>
