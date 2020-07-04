@@ -3,9 +3,17 @@
 o-bako のシミュレータです。
 ブラウザで動作します。
 
-https://inajob.github.io/o-bako-simulator/index.html で動作を確認できます。
+o-bakoは複数種類の言語で動作するように設計を模索しています
+
+- Lua 版
+  - https://inajob.github.io/o-bako-simulator/index.html
+- JavaScript 版
+  - https://inajob.github.io/o-bako-simulator/js.html
+- AssemblyScript 版
+  - https://inajob.github.io/o-bako-simulator/as.html
 
 ![docs/screenshot](docs/ogp.jpg)
 
-Luaの実行のために https://fengari.io/ を利用しています。
-Luaのエディタのために https://ace.c9.io/ を利用しています。
+- Luaの実行のために https://fengari.io/ を利用しています。
+- JavaScriptの実行のために https://github.com/svaarala/duktape を利用しています 
+- エディタのために https://ace.c9.io/ を利用しています。
